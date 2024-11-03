@@ -1,9 +1,6 @@
 from fastapi import FastAPI
 import pandas as pd
 from datetime import datetime
-
-import os
-import uvicorn
 from fastapi import FastAPI
 
 
