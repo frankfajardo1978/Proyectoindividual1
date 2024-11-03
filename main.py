@@ -6,7 +6,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.feature_extraction.text import TfidfVectorizer
 
 # Cargar el dataset
-df = pd.read_csv("/mnt/data/archivoprueba.csv")  # Ruta de tu archivo en Render
+df = pd.read_csv("archivoprueba.csv")  # Ruta de tu archivo en Render
 
 app = FastAPI()
 
@@ -46,6 +46,6 @@ async def get_recommendation(titulo: str):
         raise e
 
 # Ejecutar el servidor en Render
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+#if __name__ == "__main__":
+  #  import uvicorn
+#    uvicorn.run(app, host="0.0.0.0", port=8000)
