@@ -7,13 +7,8 @@ from wordcloud import WordCloud
 from fastapi import FastAPI, HTTPException
 from typing import List
 
-
-
 # Crear la instancia de FastAPI
 app = FastAPI()
-
-df_total = pd.DataFrame()
-
 
 # Cargar los datos y preprocesamiento
 data = pd.read_csv('archivov4.csv')
