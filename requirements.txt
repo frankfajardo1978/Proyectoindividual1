@@ -4,3 +4,4 @@ seaborn
 uvicorn
 wordcloud
 fastapi
+pydantic
