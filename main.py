@@ -5,6 +5,8 @@ import seaborn as sns
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.feature_extraction.text import TfidfVectorizer
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import FileResponse
+import os
 
 # Cargar datos
 data = pd.read_csv("archivov4.csv")
@@ -13,41 +15,50 @@ data = data[['title', 'overview']].dropna()  # Mantener solo las columnas de tí
 # Convertir títulos a minúsculas para comparación insensible a mayúsculas
 data['title_lower'] = data['title'].str.lower()
 
-# Exploración de datos
-def exploratory_data_analysis(data):
-    # Nube de palabras para títulos
+# Crear directorio para guardar gráficos
+os.makedirs("graphs", exist_ok=True)
+
+# Exploración de datos y generación de gráficos
+def generate_wordcloud():
     wordcloud = WordCloud(width=800, height=400, background_color="white").generate(" ".join(data['title']))
     plt.figure(figsize=(10, 5))
     plt.imshow(wordcloud, interpolation="bilinear")
     plt.axis("off")
     plt.title("Nube de palabras de títulos")
-    plt.show()
+    path = "graphs/wordcloud.png"
+    plt.savefig(path)
+    plt.close()
+    return path
 
-    # Análisis de longitud de los resúmenes
+def generate_histogram():
     data['overview_length'] = data['overview'].apply(lambda x: len(str(x).split()))
+    plt.figure(figsize=(10, 5))
     sns.histplot(data['overview_length'], bins=30, kde=True)
     plt.title("Distribución de la longitud de los resúmenes")
     plt.xlabel("Número de palabras")
     plt.ylabel("Frecuencia")
-    plt.show()
-
-    # Identificación de outliers en la longitud de los resúmenes
-    overview_q1 = data['overview_length'].quantile(0.25)
-    overview_q3 = data['overview_length'].quantile(0.75)
-    iqr = overview_q3 - overview_q1
-    outliers = data[(data['overview_length'] < (overview_q1 - 1.5 * iqr)) | 
-                    (data['overview_length'] > (overview_q3 + 1.5 * iqr))]
-    print("Posibles outliers en longitud de resúmenes:")
-    print(outliers[['title', 'overview_length']])
-
-# Ejecutar el análisis exploratorio
-exploratory_data_analysis(data)
+    path = "graphs/histogram.png"
+    plt.savefig(path)
+    plt.close()
+    return path
 
 # Optimización de recomendación con pre-cálculo de TF-IDF
 tfidf_vectorizer = TfidfVectorizer(stop_words="english")
 tfidf_matrix = tfidf_vectorizer.fit_transform(data['overview'].fillna(""))
 
 app = FastAPI()
+
+# Endpoint para mostrar la nube de palabras
+@app.get("/wordcloud/")
+async def wordcloud():
+    path = generate_wordcloud()
+    return FileResponse(path, media_type="image/png")
+
+# Endpoint para mostrar el histograma
+@app.get("/histogram/")
+async def histogram():
+    path = generate_histogram()
+    return FileResponse(path, media_type="image/png")
 
 # Función de recomendación optimizada
 @app.get("/recommendation/")
