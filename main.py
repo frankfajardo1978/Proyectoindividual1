@@ -18,10 +18,10 @@ data = pd.read_csv("archivov4.csv")
 
 
 app = FastAPI()
-
 @app.get("/")
 def read_root():
-    return {"Bienvenido"}     
+    return {"message": "Bienvenido a la API de información de películas"}
+
 
 @app.get("/mes")
 def cantidad_filmaciones_mes(mes: str):
@@ -102,9 +102,6 @@ def score_titulo(titulo: str):
     }
 
 
-@app.get("/")
-def read_root():
-    return {"message": "Bienvenido a la API de información de películas"}
 
 @app.get("/votos_titulo/{titulo_de_la_filmacion}")
 def votos_titulo(titulo_de_la_filmacion: str):
