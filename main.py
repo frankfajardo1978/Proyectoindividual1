@@ -217,6 +217,14 @@ plt.axis('off')
 plt.title("Nube de palabras de títulos de películas")
 plt.show()
 
+# Llenar valores nulos en las columnas que usaremos
+data['overview'] = data['overview'].fillna('')
+data['genres'] = data['genres'].fillna('')
+
+# Concatenar "overview" y "genres" como un solo texto para cada película
+data['content'] = data['overview'] + " " + data['genres']
+
+
 
 
 
