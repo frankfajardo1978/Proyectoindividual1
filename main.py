@@ -16,7 +16,7 @@ df_total = pd.DataFrame()
 
 
 # Cargar los datos y preprocesamiento
-data = pd.read_csv('archivov4.csv')
+data = pd.read_csv('archivov4.csv',low_memory=True)
 
 # --- Análisis Exploratorio de los Datos (EDA) ---
 
