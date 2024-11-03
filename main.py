@@ -224,6 +224,13 @@ data['genres'] = data['genres'].fillna('')
 # Concatenar "overview" y "genres" como un solo texto para cada película
 data['content'] = data['overview'] + " " + data['genres']
 
+# Vectorización del texto
+tfidf_vectorizer = TfidfVectorizer(stop_words='english')
+tfidf_matrix = tfidf_vectorizer.fit_transform(data['content'])
+
+# Calcular la matriz de similitud de coseno
+cosine_sim = cosine_similarity(tfidf_matrix, tfidf_matrix)
+
 
 
 
