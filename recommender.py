@@ -3,7 +3,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
 # Cargar los datos
-data = pd.read_csv('ruta_del_archivo.csv')  # Reemplaza con la ruta de tu archivo
+data = pd.read_csv('archivov4')  # Reemplaza con la ruta de tu archivo
 filtered_data = data[(data['overview'].notna()) & (data['vote_count'] >= 50)].reset_index(drop=True)
 
 # Vectorizar los resúmenes
