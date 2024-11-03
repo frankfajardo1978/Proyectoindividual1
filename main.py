@@ -7,6 +7,8 @@ from wordcloud import WordCloud
 from fastapi import FastAPI, HTTPException
 from typing import List
 
+
+
 # Crear la instancia de FastAPI
 app = FastAPI()
 
