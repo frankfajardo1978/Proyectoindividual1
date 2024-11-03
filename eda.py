@@ -3,7 +3,7 @@ from wordcloud import WordCloud
 import matplotlib.pyplot as plt
 
 # Cargar el archivo CSV
-data = pd.read_csv('ruta_del_archivo.csv')  # Reemplaza con la ruta de tu archivo
+data = pd.read_csv('archivov4.csv')  # Reemplaza con la ruta de tu archivo
 
 # Generar la nube de palabras de los títulos de películas
 titles_text = " ".join(data['title'].dropna().astype(str).values)
