@@ -11,7 +11,7 @@ df = pd.read_csv(file_path)
 
 # Llenar valores nulos en columnas importantes
 df['title'] = df['title'].fillna('')
-# df['overview'] = df['overview'].fillna('')
+df['overview'] = df['overview'].fillna('')
 # df['genres'] = df['genres'].fillna('[]')
 
 # Crear una matriz TF-IDF basada en la sinopsis (overview)
