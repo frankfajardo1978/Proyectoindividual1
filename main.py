@@ -4,8 +4,11 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 import pandas as pd
 
 # Load data from CSV
-data = pd.read_csv("archivov4.csv")  # Adjust the file path if necessary
+data = pd.read_csv("archivov4.csv")
 data = data[['title', 'overview']]  # Filter to only title and overview columns
+
+# Convert titles to lowercase for case-insensitive comparison
+data['title_lower'] = data['title'].str.lower()
 
 app = FastAPI()
 
@@ -21,8 +24,11 @@ async def get_movies():
 # Function for recommending movies based on title similarity
 @app.get("/recommendation/")
 async def recommendation(titulo: str):
+    # Convert input title to lowercase for case-insensitive matching
+    titulo = titulo.lower()
+    
     # Check if the title exists in the dataset
-    if titulo not in data['title'].values:
+    if titulo not in data['title_lower'].values:
         raise HTTPException(status_code=404, detail="Movie not found")
 
     # TF-IDF Vectorizer to convert the overview text into feature vectors
@@ -30,7 +36,7 @@ async def recommendation(titulo: str):
     tfidf_matrix = tfidf_vectorizer.fit_transform(data['overview'].fillna(""))
 
     # Get index of the input title
-    idx = data.index[data['title'] == titulo].tolist()[0]
+    idx = data.index[data['title_lower'] == titulo].tolist()[0]
     
     # Calculate cosine similarity of the movie overview with all others
     cosine_sim = cosine_similarity(tfidf_matrix[idx], tfidf_matrix).flatten()
