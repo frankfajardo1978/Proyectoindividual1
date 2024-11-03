@@ -14,15 +14,9 @@ app = FastAPI()
 
 df_total = pd.DataFrame()
 
-# Lee el archivo en chunks
-for chunk in pd.read_csv('archivov4.csv', chunksize=10000):
-    # Procesa cada chunk si es necesario, por ejemplo:
-    # chunk = chunk[chunk['columna'] > 0]  # Filtro de ejemplo
-    # Añade el chunk procesado al DataFrame total
-    data = pd.concat([df_total, chunk], ignore_index=True)
 
 # Cargar los datos y preprocesamiento
-# data = pd.read_csv('archivov4.csv')
+data = pd.read_csv('archivov4.csv')
 
 # --- Análisis Exploratorio de los Datos (EDA) ---
 
