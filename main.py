@@ -49,4 +49,9 @@ def get_recommendations(title, cosine_sim=cosine_sim):
     return df['title'].iloc[movie_indices].tolist()
 
 @app.get("/recomendacion/{titulo}")
-def recomendacion(titulo
+def recomendacion(titulo: str):
+    try:
+        recomendaciones = get_recommendations(titulo)
+        return {"recomendaciones": recomendaciones}
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
