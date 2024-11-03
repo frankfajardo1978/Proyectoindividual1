@@ -6,7 +6,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 app = FastAPI()
 
 # Cargar los datos
-file_path = '/mnt/data/archivov4.csv'  # Ruta del archivo subido
+file_path = 'archivov4.csv'  # Ruta del archivo subido
 df = pd.read_csv(file_path)
 
 # 1. Función para análisis exploratorio de datos (EDA)
