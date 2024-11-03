@@ -16,45 +16,6 @@ import pandas as pd
 
 # Supongamos que 'data' es el DataFrame cargado con los datos de películas
 
-@app.get("/director/{nombre_director}")
-def get_director(nombre_director: str):
-    try:
-        # Filtrar las películas dirigidas por el director
-        director_data = data[data['director'].str.contains(nombre_director, case=False, na=False)]
-        
-        # Verificar si el director tiene registros en el dataset
-        if director_data.empty:
-            raise HTTPException(status_code=404, detail="Director no encontrado")
-        
-        # Calcular el retorno total del director
-        retorno_total = director_data['return'].sum()
-
-        # Crear una lista de películas con la información solicitada
-        peliculas_info = [
-            {
-                "nombre_pelicula": row['title'],
-                "fecha_lanzamiento": row['release_year'],
-                "retorno_individual": row['return'],
-                "costo": row['budget'],
-                "ganancia": row['budget'] * row['return']
-            }
-            for _, row in director_data.iterrows()
-        ]
-        
-        # Devolver los resultados
-        return {
-            "nombre_director": nombre_director,
-            "retorno_total": retorno_total,
-            "peliculas": peliculas_info
-        }
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-
-
-
-
 data = data[['title', 'overview']].dropna()  # Mantener solo las columnas de título y resumen, eliminando nulos
 
 # Convertir títulos a minúsculas para comparación insensible a mayúsculas
