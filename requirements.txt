@@ -3,4 +3,4 @@ scikit-learn
 seaborn
 uvicorn
 wordcloud
-FastAPI
+fastapi
