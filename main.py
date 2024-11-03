@@ -5,6 +5,11 @@ from typing import Optional, List
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import os
+import dask.dataframe as dd
+
+# Cambia pandas por dask para carga diferida
+
+
 
 # Inicialización del servidor FastAPI
 app = FastAPI()
@@ -12,7 +17,7 @@ app = FastAPI()
 # Cargar y procesar el dataset una sola vez
 try:
     # Cargar solo las columnas necesarias para reducir el uso de memoria
-    df = pd.read_csv("archivov4.csv", usecols=["title", "overview"])
+    df = dd.read_csv("archivov4.csv", usecols=["title", "overview"])
     if 'title' not in df.columns or 'overview' not in df.columns:
         raise ValueError("El dataset debe contener las columnas 'title' y 'overview'")
 
