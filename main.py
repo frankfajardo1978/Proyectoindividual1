@@ -7,7 +7,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from fastapi import FastAPI, HTTPException
 
 # Cargar datos
-data = pd.read_csv("/mnt/data/archivov4.csv")
+data = pd.read_csv("archivov4.csv")
 data = data[['title', 'overview']].dropna()  # Mantener solo las columnas de título y resumen, eliminando nulos
 
 # Convertir títulos a minúsculas para comparación insensible a mayúsculas
