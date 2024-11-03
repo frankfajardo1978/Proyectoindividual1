@@ -206,13 +206,13 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 
 # Cargar el archivo CSV
-file_path = 'archivov4.csv'  # Cambia esto a la ruta del archivo si es necesario
-df = pd.read_csv(file_path)
+# file_path = 'archivov4.csv'  # Cambia esto a la ruta del archivo si es necesario
+# df = pd.read_csv(file_path)
 
 # Llenar valores nulos en columnas importantes
-df['title'] = df['title'].fillna('')
-df['overview'] = df['overview'].fillna('')
-df['genres'] = df['genres'].fillna('[]')
+data['title'] = data['title'].fillna('')
+data['overview'] = data['overview'].fillna('')
+data['genres'] = data['genres'].fillna('[]')
 
 # Crear una matriz TF-IDF basada en la sinopsis (overview)
 tfidf = TfidfVectorizer(stop_words='english')
@@ -244,7 +244,7 @@ def recomendacion(titulo):
     return df['title'].iloc[movie_indices].tolist()
 
 # Configurar la API con FastAPI
-app = FastAPI()
+# app = FastAPI()
 
 # Estructura del cuerpo de la solicitud
 class MovieTitle(BaseModel):
