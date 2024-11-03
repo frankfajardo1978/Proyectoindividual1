@@ -1,7 +1,6 @@
-fastapi
 pandas
-scikit-learn
-uvicorn[standard]
-matplotlib
 wordcloud
-dask
+matplotlib
+scikit-learn
+fastapi
+uvicorn
