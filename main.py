@@ -1,45 +1,71 @@
 import pandas as pd
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+import os
 
-# Cargar el dataset y verificar la existencia de la columna 'title'
-try:
-    df = pd.read_csv("archivov4.csv")
-    if 'title' not in df.columns:
-        raise ValueError("La columna 'title' no se encuentra en el dataset")
-except FileNotFoundError:
-    raise FileNotFoundError("El archivo 'archivov4.csv' no se encuentra en el directorio actual")
-except Exception as e:
-    print(f"Error al cargar el archivo: {e}")
-    raise
-
+# Inicialización del servidor FastAPI
 app = FastAPI()
 
-# Modelo para manejar los datos entrantes
+# Cargar y procesar el dataset una sola vez
+try:
+    # Cargar solo las columnas necesarias para reducir el uso de memoria
+    df = pd.read_csv("archivov4.csv", usecols=["title", "overview"])
+    if 'title' not in df.columns or 'overview' not in df.columns:
+        raise ValueError("El dataset debe contener las columnas 'title' y 'overview'")
+
+    # Rellenar valores nulos en la columna 'overview' para evitar errores
+    df['overview'] = df['overview'].fillna('')
+
+    # Vectorización y cálculo de similitud (precomputado)
+    tfidf = TfidfVectorizer(stop_words='english')
+    tfidf_matrix = tfidf.fit_transform(df['overview'])
+    cosine_sim_matrix = cosine_similarity(tfidf_matrix, tfidf_matrix)
+except Exception as e:
+    print(f"Error al cargar o procesar el archivo: {e}")
+    raise
+
+# Modelo para manejar los datos entrantes (no se usa en esta versión, pero se mantiene para posibles futuras necesidades)
 class Item(BaseModel):
     title: str
     rating: Optional[float] = None
 
-# Ruta de prueba para verificar que el servidor está en funcionamiento
 @app.get("/")
 def read_root():
     return {"message": "API activa y funcionando correctamente"}
 
-# Ruta de ejemplo que utiliza la columna 'title'
-@app.get("/search/")
-def search_title(title: str):
+# Función de recomendación optimizada
+def recomendacion(titulo: str) -> List[str]:
     try:
-        # Validación de entrada
-        if not title:
-            raise HTTPException(status_code=400, detail="El parámetro 'title' no puede estar vacío")
+        # Verificar si el título existe en el dataset
+        if titulo not in df['title'].values:
+            raise ValueError("La película no se encuentra en el dataset")
 
-        # Búsqueda en el dataframe
-        result = df[df['title'].str.contains(title, case=False, na=False)]
-        if result.empty:
-            return {"message": "No se encontraron coincidencias"}
+        # Índice de la película en el dataset
+        idx = df.index[df['title'] == titulo][0]
 
-        return result.to_dict(orient="records")
+        # Obtener índices de las 5 películas más similares, excluyendo la misma película
+        sim_scores = list(enumerate(cosine_sim_matrix[idx]))
+        sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
+        sim_indices = [i[0] for i in sim_scores[1:6]]
+        
+        # Retornar títulos de las películas recomendadas
+        recomendaciones = df['title'].iloc[sim_indices].tolist()
+        return recomendaciones
     except Exception as e:
-        print(f"Error en /search/: {e}")
-        raise HTTPException(status_code=500, detail="Error interno del servidor")
+        print(f"Error en la recomendación: {e}")
+        raise HTTPException(status_code=500, detail="Error en la recomendación")
+
+# Endpoint para recomendaciones
+@app.get("/recomendacion/")
+def obtener_recomendacion(title: str):
+    try:
+        recomendaciones = recomendacion(title)
+        return {"recomendaciones": recomendaciones}
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        print(f"Error en /recomendacion/: {e}")
+        raise HTTPException(status_code=500, detail="Error en la recomendación")
