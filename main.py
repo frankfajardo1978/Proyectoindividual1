@@ -199,60 +199,6 @@ def get_director(nombre_director: str):
         # Manejo de errores para dar más detalles en el mensaje de error
         raise HTTPException(status_code=500, detail=str(e))
 
-import pandas as pd
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
-from wordcloud import WordCloud
-import matplotlib.pyplot as plt
-
-
-
-# Crear nube de palabras de los títulos de las películas
-titles = data['title'].dropna().astype(str)
-all_titles_text = ' '.join(titles)
-wordcloud = WordCloud(width=800, height=400, background_color='white').generate(all_titles_text)
-
-plt.figure(figsize=(10, 5))
-plt.imshow(wordcloud, interpolation='bilinear')
-plt.axis('off')
-plt.title("Nube de palabras de títulos de películas")
-plt.show()
-
-# Llenar valores nulos en las columnas que usaremos
-data['overview'] = data['overview'].fillna('')
-data['genres'] = data['genres'].fillna('')
-
-# Concatenar "overview" y "genres" como un solo texto para cada película
-data['content'] = data['overview'] + " " + data['genres']
-
-# Vectorización del texto
-tfidf_vectorizer = TfidfVectorizer(stop_words='english')
-tfidf_matrix = tfidf_vectorizer.fit_transform(data['content'])
-
-# Calcular la matriz de similitud de coseno
-cosine_sim = cosine_similarity(tfidf_matrix, tfidf_matrix)
-
-def recomendacion(titulo):
-    # Obtener el índice de la película que coincide con el título
-    idx = data.index[data['title'] == titulo].tolist()
-    
-    if not idx:
-        return "Película no encontrada en la base de datos"
-    
-    idx = idx[0]
-    
-    # Obtenemos los puntajes de similitud de todas las películas respecto a la película dada
-    sim_scores = list(enumerate(cosine_sim[idx]))
-    
-    # Ordenamos las películas por puntaje de similitud en orden descendente
-    sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
-    
-    # Obtener índices de las 5 películas más similares, omitiendo la misma
-    sim_indices = [i[0] for i in sim_scores[1:6]]
-    
-    # Retornar los títulos de las películas más similares
-    return data['title'].iloc[sim_indices].tolist()
-
 
 
 
