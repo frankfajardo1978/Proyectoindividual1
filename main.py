@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 app = FastAPI()
 
 # Cargar el dataset
-data_path = "/mnt/data/archivov4.csv"  # Ajusta el nombre según corresponda
+data_path = "archivov4.csv"  # Ajusta el nombre según corresponda
 df = pd.read_csv(data_path)
 
 # Verificar que el dataset contiene la columna 'titulo'
