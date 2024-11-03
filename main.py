@@ -216,7 +216,7 @@ data['genres'] = data['genres'].fillna('[]')
 
 # Crear una matriz TF-IDF basada en la sinopsis (overview)
 tfidf = TfidfVectorizer(stop_words='english')
-tfidf_matrix = tfidf.fit_transform(df['overview'])
+tfidf_matrix = tfidf.fit_transform(data['overview'])
 
 # Calcular la matriz de similitud de coseno
 cosine_sim = cosine_similarity(tfidf_matrix, tfidf_matrix)
@@ -241,7 +241,7 @@ def recomendacion(titulo):
     movie_indices = [i[0] for i in sim_scores]
     
     # Retornar los títulos de las películas
-    return df['title'].iloc[movie_indices].tolist()
+    return data['title'].iloc[movie_indices].tolist()
 
 # Configurar la API con FastAPI
 # app = FastAPI()
