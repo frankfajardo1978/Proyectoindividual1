@@ -3,6 +3,9 @@ import pandas as pd
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import uvicorn
+import os
+port = int(os.getenv("PORT", 10000)
+
 app = FastAPI()
 
 # Cargar los datos
