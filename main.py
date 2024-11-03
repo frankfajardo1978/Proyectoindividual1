@@ -6,7 +6,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 
 # Cargar el archivo CSV
-file_path = 'archivov4.csv'  # Cambia esto a la ruta del archivo si es necesario
+file_path = 'arcchivoprueba.csv'  # Cambia esto a la ruta del archivo si es necesario
 df = pd.read_csv(file_path)
 
 # Llenar valores nulos en columnas importantes
