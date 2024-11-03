@@ -3,15 +3,13 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 from typing import Optional
 
-# Cargar el dataset
+# Cargar el dataset y verificar la existencia de la columna 'title'
 try:
     df = pd.read_csv("archivov4.csv")
+    if 'title' not in df.columns:
+        raise ValueError("La columna 'title' no se encuentra en el dataset")
 except FileNotFoundError:
     raise FileNotFoundError("El archivo 'archivov4.csv' no se encuentra en el directorio actual")
-
-# Verificar si la columna 'title' está en el dataset
-if 'title' not in df.columns:
-    raise ValueError("La columna 'title' no se encuentra en el dataset")
 
 app = FastAPI()
 
@@ -32,11 +30,3 @@ def search_title(title: str):
     if result.empty:
         return {"message": "No se encontraron coincidencias"}
     return result.to_dict(orient="records")
-
-
-try:
-    df = pd.read_csv("archivov4.csv")
-    print("Archivo cargado exitosamente")
-except FileNotFoundError:
-    print("El archivo CSV no se encuentra")
-    raise FileNotFoundError("El archivo 'archivov4.csv' no se encuentra en el servidor")
