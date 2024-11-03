@@ -44,7 +44,7 @@ def recomendacion(titulo):
     return df['title'].iloc[movie_indices].tolist()
 
 # Configurar la API con FastAPI
-app = FastAPI()
+# app = FastAPI()
 
 # Estructura del cuerpo de la solicitud
 class MovieTitle(BaseModel):
