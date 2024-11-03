@@ -1,6 +1,6 @@
 fastapi
-uvicorn
 pandas
 scikit-learn
-wordcloud
+uvicorn[standard]
 matplotlib
+wordcloud
