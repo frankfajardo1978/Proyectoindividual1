@@ -11,12 +11,12 @@ df = pd.read_csv(file_path)
 
 # Llenar valores nulos en columnas importantes
 df['title'] = df['title'].fillna('')
-# df['overview'] = df['overview'].fillna('')
+df['overview'] = df['overview'].fillna('')
 # df['genres'] = df['genres'].fillna('[]')
 
 # Crear una matriz TF-IDF basada en la sinopsis (overview)
 tfidf = TfidfVectorizer(stop_words='english')
-# tfidf_matrix = tfidf.fit_transform(df['overview'])
+tfidf_matrix = tfidf.fit_transform(df['overview'])
 
 # Calcular la matriz de similitud de coseno
 cosine_sim = cosine_similarity(tfidf_matrix, tfidf_matrix)
