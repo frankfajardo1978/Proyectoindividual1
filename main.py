@@ -4,7 +4,7 @@ from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import uvicorn
 import os
-port = int(os.getenv("PORT", 10000)
+port = int(os.getenv("PORT", 10000))
 
 app = FastAPI()
 
