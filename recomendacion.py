@@ -5,7 +5,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 
 # Cargar los datos y preparar el modelo dentro de la función para evitar cargar en cada instancia
 def cargar_modelo():
-    df = pd.read_csv('archivov4.csv')
+    df = pd.read_csv('archivoprueba.csv')
     df['title'] = df['title'].fillna('')
     tfidf = TfidfVectorizer(stop_words='english')
     tfidf_matrix = tfidf.fit_transform(df['title'])
