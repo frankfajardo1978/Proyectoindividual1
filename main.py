@@ -32,3 +32,11 @@ def search_title(title: str):
     if result.empty:
         return {"message": "No se encontraron coincidencias"}
     return result.to_dict(orient="records")
+
+
+try:
+    df = pd.read_csv("archivov4.csv")
+    print("Archivo cargado exitosamente")
+except FileNotFoundError:
+    print("El archivo CSV no se encuentra")
+    raise FileNotFoundError("El archivo 'archivov4.csv' no se encuentra en el servidor")
