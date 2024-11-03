@@ -198,6 +198,24 @@ def get_director(nombre_director: str):
 
 
 
+import pandas as pd
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+from wordcloud import WordCloud
+import matplotlib.pyplot as plt
+
+
+
+# Crear nube de palabras de los títulos de las películas
+titles = data['title'].dropna().astype(str)
+all_titles_text = ' '.join(titles)
+wordcloud = WordCloud(width=800, height=400, background_color='white').generate(all_titles_text)
+
+plt.figure(figsize=(10, 5))
+plt.imshow(wordcloud, interpolation='bilinear')
+plt.axis('off')
+plt.title("Nube de palabras de títulos de películas")
+plt.show()
 
 
 
