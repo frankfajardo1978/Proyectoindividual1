@@ -198,58 +198,44 @@ def get_director(nombre_director: str):
 
 
 
-# Importar librerías necesarias
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.metrics.pairwise import linear_kernel
 from fastapi import FastAPI
 from pydantic import BaseModel
 
-# Cargar el archivo CSV
-# file_path = 'archivov4.csv'  # Cambia esto a la ruta del archivo si es necesario
-# df = pd.read_csv(file_path)
+# Inicializar FastAPI
+app = FastAPI()
 
-# Llenar valores nulos en columnas importantes
-data['title'] = data['title'].fillna('')
-data['overview'] = data['overview'].fillna('')
-data['genres'] = data['genres'].fillna('[]')
+# Cargar solo las columnas necesarias
+file_path = 'archivov4.csv'  # Cambia la ruta si es necesario
+df = pd.read_csv(file_path, usecols=['title', 'overview']).fillna('')
 
-# Crear una matriz TF-IDF basada en la sinopsis (overview)
+# Crear la matriz TF-IDF en el momento del inicio para minimizar el uso de memoria
 tfidf = TfidfVectorizer(stop_words='english')
-tfidf_matrix = tfidf.fit_transform(data['overview'])
-
-# Calcular la matriz de similitud de coseno
-cosine_sim = cosine_similarity(tfidf_matrix, tfidf_matrix)
+tfidf_matrix = tfidf.fit_transform(df['overview'])
 
 # Definir la función de recomendación
 def recomendacion(titulo):
     # Obtener el índice de la película que coincide con el título
     idx = df.index[df['title'] == titulo].tolist()
     if not idx:
-        return "Película no encontrada."
+        return ["Película no encontrada."]
     
     idx = idx[0]
 
-    # Obtener las puntuaciones de similitud de esa película con todas las demás
-    sim_scores = list(enumerate(cosine_sim[idx]))
+    # Calcular la similitud solo para la película solicitada
+    cosine_sim = linear_kernel(tfidf_matrix[idx], tfidf_matrix).flatten()
     
-    # Ordenar las películas en base a la similitud de coseno
-    sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
-    
-    # Seleccionar los 5 títulos más similares
-    sim_scores = sim_scores[1:6]
-    movie_indices = [i[0] for i in sim_scores]
-    
-    # Retornar los títulos de las películas
-    return data['title'].iloc[movie_indices].tolist()
+    # Ordenar y seleccionar las 5 películas más similares
+    sim_scores = cosine_sim.argsort()[-6:-1][::-1]
+    return df['title'].iloc[sim_scores].tolist()
 
-# Configurar la API con FastAPI
-# app = FastAPI()
-
-# Estructura del cuerpo de la solicitud
+# Configurar la estructura de entrada para la API
 class MovieTitle(BaseModel):
     titulo: str
 
+# Crear el endpoint de la API
 @app.post("/recomendacion/")
 def get_recomendacion(data: MovieTitle):
     return {"recomendaciones": recomendacion(data.titulo)}
