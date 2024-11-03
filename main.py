@@ -1,51 +1,52 @@
-# main.py
 from fastapi import FastAPI, HTTPException
-from typing import List
 import pandas as pd
+from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
-from sklearn.feature_extraction.text import TfidfVectorizer
-
-# Cargar el dataset
-df = pd.read_csv("archivoprueba.csv")  # Ruta de tu archivo en Render
 
 app = FastAPI()
 
-# Endpoint de verificación de datos
-@app.get("/explore")
-async def explore_data():
-    return {
-        "columns": df.columns.tolist(),
-        "num_rows": len(df)
+# Cargar los datos
+file_path = '/mnt/data/archivov4.csv'  # Ruta del archivo subido
+df = pd.read_csv(file_path)
+
+# 1. Función para análisis exploratorio de datos (EDA)
+@app.get("/eda")
+def eda():
+    # Analizar datos: algunas estadísticas básicas y visualizaciones de ejemplo
+    eda_results = {
+        "numero_de_filas": df.shape[0],
+        "numero_de_columnas": df.shape[1],
+        "columnas": df.columns.tolist(),
+        "datos_nulos": df.isnull().sum().to_dict(),
+        "descripcion": df.describe().to_dict()
     }
+    return eda_results
 
-# Función para el sistema de recomendación
-def recomendacion(titulo: str) -> List[str]:
-    if titulo not in df['titulo'].values:
-        raise HTTPException(status_code=404, detail="Título no encontrado")
-    
-    # Vectorización de los títulos de las películas
-    tfidf = TfidfVectorizer(stop_words="english")
-    tfidf_matrix = tfidf.fit_transform(df["titulo"])
+# 2. Función de recomendación
+# Procesamiento de texto para el sistema de recomendación
+vectorizer = CountVectorizer()
+count_matrix = vectorizer.fit_transform(df['title'])
+cosine_sim = cosine_similarity(count_matrix)
 
-    # Similaridad de coseno entre la película solicitada y las demás
-    idx = df[df['titulo'] == titulo].index[0]
-    cosine_similarities = cosine_similarity(tfidf_matrix[idx], tfidf_matrix).flatten()
+def get_recommendations(title, cosine_sim=cosine_sim):
+    # Verificar si el título existe en el dataframe
+    if title not in df['title'].values:
+        raise ValueError("La película no se encuentra en la base de datos.")
     
-    # Obtener los índices de las 5 películas más similares (excluyendo la misma)
-    similar_indices = cosine_similarities.argsort()[-6:-1][::-1]
-    recommendations = df.iloc[similar_indices]["titulo"].tolist()
+    # Obtener el índice de la película
+    idx = df[df['title'] == title].index[0]
     
-    return recommendations
+    # Similaridades de la película con las demás
+    sim_scores = list(enumerate(cosine_sim[idx]))
+    
+    # Ordenar las películas según la similitud
+    sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
+    
+    # Obtener los índices de las 5 películas más similares
+    movie_indices = [i[0] for i in sim_scores[1:6]]
+    
+    # Retornar los títulos de las películas recomendadas
+    return df['title'].iloc[movie_indices].tolist()
 
-# Endpoint para el sistema de recomendación
 @app.get("/recomendacion/{titulo}")
-async def get_recommendation(titulo: str):
-    try:
-        return {"recommendations": recomendacion(titulo)}
-    except HTTPException as e:
-        raise e
-
-# Ejecutar el servidor en Render
-#if __name__ == "__main__":
-  #  import uvicorn
-#    uvicorn.run(app, host="0.0.0.0", port=8000)
+def recomendacion(titulo
