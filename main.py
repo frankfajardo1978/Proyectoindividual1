@@ -12,14 +12,14 @@ data['title_lower'] = data['title'].str.lower()
 
 app = FastAPI()
 
-@app.get("/")
-async def read_root():
-    return {"message": "Welcome to the Movie Recommendation API"}
+# @app.get("/")
+# async def read_root():
+#    return {"message": "Welcome to the Movie Recommendation API"}
 
 # Endpoint to get movie titles and overviews
-@app.get("/movies/")
-async def get_movies():
-    return data[['title', 'overview']].to_dict(orient="records")
+#@app.get("/movies/")
+# async def get_movies():
+#    return data[['title', 'overview']].to_dict(orient="records")
 
 # Function for recommending movies based on title similarity
 @app.get("/recommendation/")
