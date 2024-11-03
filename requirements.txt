@@ -1,5 +1,8 @@
+pandas
+matplotlib
+wordcloud
+seaborn
+scikit-learn
 fastapi
 uvicorn
-pandas
-scikit-learn
 
