@@ -236,6 +236,6 @@ class MovieTitle(BaseModel):
     titulo: str
 
 # Crear el endpoint de la API
-@app.post("/recomendacion/")
+@app.get("/recomendacion/")
 def get_recomendacion(data: MovieTitle):
     return {"recomendaciones": recomendacion(data.titulo)}
