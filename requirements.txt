@@ -1,7 +1,4 @@
+fastapi
 pandas
 scikit-learn
-seaborn
 uvicorn
-wordcloud
-fastapi
-pydantic
