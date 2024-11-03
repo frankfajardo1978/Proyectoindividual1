@@ -46,11 +46,11 @@ async def recomendacion(request: RecomendacionRequest):
     if titulo not in df['titulo'].values:
         raise HTTPException(status_code=404, detail="La película no fue encontrada")
     
-    idx = df[df['titulo'] == titulo].index[0]
+    idx = df[df['title'] == titulo].index[0]
     sim_scores = list(enumerate(cosine_sim[idx]))
     sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
     top_indices = [i[0] for i in sim_scores[1:6]]
-    recomendaciones = df['titulo'].iloc[top_indices].tolist()
+    recomendaciones = df['title'].iloc[top_indices].tolist()
     
     return {"recomendaciones": recomendaciones}
 
