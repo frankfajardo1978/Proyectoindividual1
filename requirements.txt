@@ -1,7 +1,7 @@
-fastapi
 pandas
 matplotlib
-seaborn
 wordcloud
+seaborn
 scikit-learn
+fastapi
 uvicorn
