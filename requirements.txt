@@ -1,6 +1,3 @@
 fastapi
 pandas
 uvicorn
-scikit-learn
-wordcloud
-matplotlib
