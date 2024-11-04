@@ -21,6 +21,10 @@ os.makedirs("graphs", exist_ok=True)
 # Crear aplicación FastAPI
 app = FastAPI()
 
+@app.get("/inicio")
+async def bienvenida():
+    return "Bienvenidos al proyecto nr 1 de Francisco Fajardo (Soy Henry)"
+
 # Endpoint: cantidad_filmaciones_mes
 @app.get("/mes")
 def cantidad_filmaciones_mes(mes: str):
