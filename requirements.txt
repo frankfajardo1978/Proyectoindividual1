@@ -1,7 +1,3 @@
-pandas
-matplotlib
-wordcloud
-seaborn
-scikit-learn
 fastapi
+pandas
 uvicorn
