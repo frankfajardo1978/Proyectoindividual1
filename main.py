@@ -9,7 +9,7 @@ from fastapi.responses import FileResponse
 import os
 
 # Cargar datos
-data = pd.read_csv("archivov4.csv",index_col=0)
+data = pd.read_csv("/mnt/data/archivov4.csv")
 data = data[['title', 'overview']].dropna()  # Mantener solo las columnas de título y resumen, eliminando nulos
 
 # Convertir títulos a minúsculas para comparación insensible a mayúsculas
@@ -18,15 +18,16 @@ data['title_lower'] = data['title'].str.lower()
 # Crear directorio para guardar gráficos
 os.makedirs("graphs", exist_ok=True)
 
-# Función para generar el mapa de calor de la matriz de correlación
-def generate_heatmap():
-    numeric_data = data.select_dtypes(include=['float64', 'int64'])
-    correlation_matrix = numeric_data.corr()
+# Generación del mapa de calor de la matriz de correlaciones
+def generate_correlation_heatmap():
+    # Calcular matriz de correlaciones
+    correlation_matrix = data[['title', 'overview']].apply(lambda x: pd.factorize(x)[0]).corr()
 
-    plt.figure(figsize=(10, 8))
-    sns.heatmap(correlation_matrix, annot=True, cmap="coolwarm", cbar=True)
-    plt.title("Mapa de calor de la matriz de correlación")
-    path = "graphs/heatmap.png"
+    # Crear el mapa de calor
+    plt.figure(figsize=(8, 6))
+    sns.heatmap(correlation_matrix, annot=True, cmap="coolwarm", fmt=".2f")
+    plt.title("Mapa de calor de la matriz de correlaciones")
+    path = "graphs/correlation_heatmap.png"
     plt.savefig(path)
     plt.close()
     return path
@@ -61,6 +62,12 @@ tfidf_matrix = tfidf_vectorizer.fit_transform(data['overview'].fillna(""))
 
 app = FastAPI()
 
+# Endpoint para mostrar el mapa de calor de la matriz de correlaciones
+@app.get("/correlation-heatmap/")
+async def correlation_heatmap():
+    path = generate_correlation_heatmap()
+    return FileResponse(path, media_type="image/png")
+
 # Endpoint para mostrar la nube de palabras
 @app.get("/wordcloud/")
 async def wordcloud():
@@ -71,12 +78,6 @@ async def wordcloud():
 @app.get("/histogram/")
 async def histogram():
     path = generate_histogram()
-    return FileResponse(path, media_type="image/png")
-
-# Endpoint para mostrar el mapa de calor de la matriz de correlación
-@app.get("/heatmap/")
-async def heatmap():
-    path = generate_heatmap()
     return FileResponse(path, media_type="image/png")
 
 # Función de recomendación optimizada
@@ -98,3 +99,4 @@ async def recommendation(titulo: str):
     recommendations = data.iloc[similar_indices]['title'].tolist()
     
     return {"recommendations": recommendations}
+
