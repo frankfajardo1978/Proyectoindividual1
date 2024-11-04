@@ -42,22 +42,17 @@ def generate_histogram():
     plt.close()
     return path
 
-# Nueva función para generar la matriz de correlación
-def generate_correlation_matrix():
-    # Filtrar solo columnas numéricas para la correlación
-    numeric_data = data.select_dtypes(include=['float64', 'int64'])
-    if numeric_data.empty:
-        raise ValueError("No hay columnas numéricas para calcular la correlación.")
-    
-    correlation_matrix = numeric_data.corr()
+# Seleccionar solo las columnas numéricas para la matriz de correlación
+numeric_data = data[['Unnamed: 0', 'belongs_to_collection', 'budget', 'popularity', 
+                     'revenue', 'runtime', 'vote_average', 'vote_count', 
+                     'release_year', 'return']]
 
-    plt.figure(figsize=(10, 8))
-    sns.heatmap(correlation_matrix, annot=True, cmap="coolwarm", center=0)
-    plt.title("Matriz de Correlación")
-    path = "graphs/correlation_matrix.png"
-    plt.savefig(path)
-    plt.close()
-    return path
+@app.get("/correlation_matrix")
+async def get_correlation_matrix():
+    # Calcular la matriz de correlación
+    correlation_matrix = numeric_data.corr()
+    # Convertir la matriz a formato JSON
+    return JSONResponse(content=correlation_matrix.to_dict())
 
 # Optimización de recomendación con pre-cálculo de TF-IDF
 tfidf_vectorizer = TfidfVectorizer(stop_words="english")
