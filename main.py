@@ -1,4 +1,12 @@
-import numpy as np
+mport pandas as pd
+import matplotlib.pyplot as plt
+from wordcloud import WordCloud
+import seaborn as sns
+from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.feature_extraction.text import TfidfVectorizer
+from fastapi import FastAPI, HTTPException
+from fastapi.responses import FileResponse
+import os
 
 # Load data
 data = pd.read_csv("archivov4.csv")
