@@ -21,26 +21,31 @@ os.makedirs("graphs", exist_ok=True)
 # Generación del mapa de calor de la matriz de correlaciones
 
 
-# Cargar los datos
-file_path = 'archivov4.csv'
-df_2 = pd.read_csv(file_path,index_col=0)
+# Cargar el archivo CSV
+data2 = pd.read_csv("archivov4.csv",index_col=0)
 
-# Seleccionar solo las columnas numéricas
-numeric_data = df_2.select_dtypes(include=['float64', 'int64'])
 
+
+# Función de generación del mapa de calor de correlación para variables numéricas
 def generate_correlation_heatmap():
-    # Calcular matriz de correlaciones
-    correlation_matrix = df_2.apply(lambda x: pd.factorize(x)[0]).corr()
+    # Seleccionar solo las columnas numéricas
+    numerical_data = data2.select_dtypes(include=['float64', 'int64'])
+    
+    # Calcular matriz de correlación entre columnas numéricas
+    correlation_matrix = numerical_data.corr()
 
     # Crear el mapa de calor
-    plt.figure(figsize=(8, 6))
+    plt.figure(figsize=(10, 8))
     sns.heatmap(correlation_matrix, annot=True, cmap="coolwarm", fmt=".2f")
-    plt.title("Mapa de calor de la matriz de correlaciones")
+    plt.title("Mapa de calor de la matriz de correlaciones (variables numéricas)")
     path = "graphs/correlation_heatmap.png"
     plt.savefig(path)
     plt.close()
     return path
 
+# Llamada a la función y ruta de guardado
+heatmap_path = generate_correlation_heatmap()
+print(f"Mapa de calor guardado en: {heatmap_path}")
 # Exploración de datos y generación de gráficos
 def generate_wordcloud():
     wordcloud = WordCloud(width=800, height=400, background_color="white").generate(" ".join(data['title']))
