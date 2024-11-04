@@ -8,9 +8,11 @@ from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
 import os
 
-# Cargar datos
-data = pd.read_csv("archivov4.csv",index_col=0)
-data = data.dropna()  # Eliminamos filas con valores nulos para simplificar
+# Cargar datos y eliminar columna 'Unnamed' si está presente
+data = pd.read_csv("/mnt/data/archivov4.csv")
+data = data.loc[:, ~data.columns.str.contains('^Unnamed')]  # Eliminar columnas con 'Unnamed'
+
+data = data[['title', 'overview']].dropna()  # Mantener solo columnas de título y resumen, eliminando nulos
 
 # Convertir títulos a minúsculas para comparación insensible a mayúsculas
 data['title_lower'] = data['title'].str.lower()
@@ -102,3 +104,8 @@ async def recommendation(titulo: str):
     recommendations = data.iloc[similar_indices]['title'].tolist()
     
     return {"recommendations": recommendations}
+
+# Condicional para ejecutar el servidor si se ejecuta directamente
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run("main:app", host="0.0.0.0", port=10000, reload=True)
