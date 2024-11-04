@@ -83,15 +83,22 @@ def cantidad_filmaciones_dia(dia: str):
     cantidad = data[data['dia_semana'] == dia].shape[0]
     return {"mensaje": f"{cantidad} películas fueron estrenadas en los días {dia}"}
 
+# Ensure all titles are lowercase for matching purposes
+data['title_lower'] = data['title'].str.lower()
+
 @app.get("/titulo")
 def score_titulo(titulo: str):
+    # Search by lowercase title
     film = data[data['title_lower'] == titulo.lower()]
     if film.empty:
         return {"error": "Película no encontrada"}
+    
     titulo = film.iloc[0]['title']
     año = int(film.iloc[0]['release_year'])
     score = film.iloc[0]['popularity']
+    
     return {"mensaje": f"La película {titulo} fue estrenada en el año {año} con un score/popularidad de {score}"}
+
 
 @app.get("/votos_titulo/{titulo_de_la_filmacion}")
 def votos_titulo(titulo_de_la_filmacion: str):
