@@ -5,7 +5,7 @@ import seaborn as sns
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.feature_extraction.text import TfidfVectorizer
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 import os
 
 # Cargar datos
@@ -42,21 +42,16 @@ def generate_histogram():
     plt.close()
     return path
 
-# Seleccionar solo las columnas numéricas para la matriz de correlación
-numeric_data = data[['Unnamed: 0', 'belongs_to_collection', 'budget', 'popularity', 
-                     'revenue', 'runtime', 'vote_average', 'vote_count', 
-                     'release_year', 'return']]
-
-@app.get("/correlation_matrix")
-async def get_correlation_matrix():
-    # Calcular la matriz de correlación
-    correlation_matrix = numeric_data.corr()
-    # Convertir la matriz a formato JSON
-    return JSONResponse(content=correlation_matrix.to_dict())
-
 # Optimización de recomendación con pre-cálculo de TF-IDF
 tfidf_vectorizer = TfidfVectorizer(stop_words="english")
 tfidf_matrix = tfidf_vectorizer.fit_transform(data['overview'].fillna(""))
+
+# Seleccionar columnas numéricas para la matriz de correlación
+numeric_data = pd.read_csv("archivov4.csv")
+numeric_columns = ['Unnamed: 0', 'belongs_to_collection', 'budget', 'popularity', 
+                   'revenue', 'runtime', 'vote_average', 'vote_count', 
+                   'release_year', 'return']
+numeric_data = numeric_data[numeric_columns]
 
 app = FastAPI()
 
@@ -71,15 +66,6 @@ async def wordcloud():
 async def histogram():
     path = generate_histogram()
     return FileResponse(path, media_type="image/png")
-
-# Nuevo endpoint para mostrar la matriz de correlación
-@app.get("/correlation_matrix/")
-async def correlation_matrix():
-    try:
-        path = generate_correlation_matrix()
-        return FileResponse(path, media_type="image/png")
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
 
 # Función de recomendación optimizada
 @app.get("/recommendation/")
@@ -100,3 +86,12 @@ async def recommendation(titulo: str):
     recommendations = data.iloc[similar_indices]['title'].tolist()
     
     return {"recommendations": recommendations}
+
+# Endpoint para la matriz de correlación
+@app.get("/correlation_matrix")
+async def get_correlation_matrix():
+    # Calcular la matriz de correlación
+    correlation_matrix = numeric_data.corr()
+    # Convertir la matriz a formato JSON
+    return JSONResponse(content=correlation_matrix.to_dict())
+
