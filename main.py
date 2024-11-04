@@ -21,7 +21,7 @@ os.makedirs("graphs", exist_ok=True)
 # Crear aplicación FastAPI
 app = FastAPI()
 
-@app.get("/inicio")
+@app.get("/")
 async def bienvenida():
     return "Bienvenidos al proyecto nr 1 de Francisco Fajardo (Soy Henry)"
 
