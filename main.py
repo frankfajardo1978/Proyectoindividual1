@@ -9,7 +9,7 @@ from fastapi.responses import FileResponse
 import os
 
 # Cargar datos
-data = pd.read_csv("/mnt/data/archivov4.csv")
+data = pd.read_csv("rchivov4.csv")
 data = data.dropna()  # Eliminamos filas con valores nulos para simplificar
 
 # Convertir títulos a minúsculas para comparación insensible a mayúsculas
