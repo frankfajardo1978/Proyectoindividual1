@@ -22,7 +22,7 @@ os.makedirs("graphs", exist_ok=True)
 
 
 # Cargar el archivo CSV
-data2 = pd.read_csv("archivov4.csv",index_col=0)
+data2 = pd.read_csv("archivov4.csv,index_col=0")
 
 
 
