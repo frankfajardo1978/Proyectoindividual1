@@ -1,7 +1,7 @@
 import numpy as np
 
 # Load data
-data = pd.read_csv("/mnt/data/archivov4.csv")
+data = pd.read_csv("archivov4.csv")
 data = data[['title', 'overview']].dropna()  # Keep only title and overview columns, removing null values
 
 # Convert titles to lowercase for case-insensitive comparison
