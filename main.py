@@ -18,6 +18,20 @@ data['title_lower'] = data['title'].str.lower()
 # Crear directorio para guardar gráficos
 os.makedirs("graphs", exist_ok=True)
 
+# Generación del mapa de calor de la matriz de correlaciones
+def generate_correlation_heatmap():
+    # Calcular matriz de correlaciones
+    correlation_matrix = data[['title', 'overview']].apply(lambda x: pd.factorize(x)[0]).corr()
+
+    # Crear el mapa de calor
+    plt.figure(figsize=(8, 6))
+    sns.heatmap(correlation_matrix, annot=True, cmap="coolwarm", fmt=".2f")
+    plt.title("Mapa de calor de la matriz de correlaciones")
+    path = "graphs/correlation_heatmap.png"
+    plt.savefig(path)
+    plt.close()
+    return path
+
 # Exploración de datos y generación de gráficos
 def generate_wordcloud():
     wordcloud = WordCloud(width=800, height=400, background_color="white").generate(" ".join(data['title']))
@@ -48,27 +62,11 @@ tfidf_matrix = tfidf_vectorizer.fit_transform(data['overview'].fillna(""))
 
 app = FastAPI()
 
-@app.route('/correlation-heatmap', methods=['GET'])
-def correlation_heatmap():
-    try:
-        # Generar la matriz de correlación
-        correlation_matrix = df.corr()
-        
-        # Crear el gráfico del mapa de calor
-        plt.figure(figsize=(10, 8))
-        sns.heatmap(correlation_matrix, annot=True, cmap='coolwarm', square=True, fmt=".2f")
-        
-        # Guardar la imagen en un objeto de bytes
-        img = io.BytesIO()
-        plt.savefig(img, format='png')
-        img.seek(0)
-        plt.close()
-        
-        # Devolver la imagen
-        return send_file(img, mimetype='image/png')
-    except Exception as e:
-        return jsonify({"error": str(e)})
-
+# Endpoint para mostrar el mapa de calor de la matriz de correlaciones
+@app.get("/correlation-heatmap/")
+async def correlation_heatmap():
+    path = generate_correlation_heatmap()
+    return FileResponse(path, media_type="image/png")
 
 # Endpoint para mostrar la nube de palabras
 @app.get("/wordcloud/")
@@ -101,3 +99,5 @@ async def recommendation(titulo: str):
     recommendations = data.iloc[similar_indices]['title'].tolist()
     
     return {"recommendations": recommendations}
+
+
