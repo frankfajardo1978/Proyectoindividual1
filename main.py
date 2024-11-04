@@ -9,7 +9,7 @@ from fastapi.responses import FileResponse
 import os
 
 # Cargar datos
-data = pd.read_csv("archivov4.csv")
+data = pd.read_csv("/mnt/data/archivov4.csv")
 data = data[['title', 'overview']].dropna()  # Mantener solo las columnas de título y resumen, eliminando nulos
 
 # Convertir títulos a minúsculas para comparación insensible a mayúsculas
@@ -44,7 +44,11 @@ def generate_histogram():
 
 # Nueva función para generar la matriz de correlación
 def generate_correlation_matrix():
-    numeric_data = data.select_dtypes(include=['float64', 'int64'])  # Seleccionar solo columnas numéricas
+    # Filtrar solo columnas numéricas para la correlación
+    numeric_data = data.select_dtypes(include=['float64', 'int64'])
+    if numeric_data.empty:
+        raise ValueError("No hay columnas numéricas para calcular la correlación.")
+    
     correlation_matrix = numeric_data.corr()
 
     plt.figure(figsize=(10, 8))
@@ -76,8 +80,11 @@ async def histogram():
 # Nuevo endpoint para mostrar la matriz de correlación
 @app.get("/correlation_matrix/")
 async def correlation_matrix():
-    path = generate_correlation_matrix()
-    return FileResponse(path, media_type="image/png")
+    try:
+        path = generate_correlation_matrix()
+        return FileResponse(path, media_type="image/png")
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 # Función de recomendación optimizada
 @app.get("/recommendation/")
