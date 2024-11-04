@@ -22,8 +22,8 @@ os.makedirs("graphs", exist_ok=True)
 
 
 # Cargar los datos
-file_path = '/mnt/data/archivov4.csv'
-df_2 = pd.read_csv(file_path)
+file_path = 'archivov4.csv'
+df_2 = pd.read_csv(file_path,index_col=0)
 
 # Seleccionar solo las columnas numéricas
 numeric_data = df_2.select_dtypes(include=['float64', 'int64'])
