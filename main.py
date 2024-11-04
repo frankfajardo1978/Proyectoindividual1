@@ -40,7 +40,7 @@ def cantidad_filmaciones_mes(mes: str):
     data['release_date'] = pd.to_datetime(data['release_date'], errors='coerce')
     peliculas_mes = data[data['release_date'].dt.month == numero_mes]
     cantidad = len(peliculas_mes)
-    return {"mensaje": f"{cantidad} cantidad de películas fueron estrenadas en el mes de {mes.capitalize()}"}
+    return {"mensaje": f"{cantidad} películas fueron estrenadas en el mes de {mes.capitalize()}"}
 
 # Endpoint: cantidad_filmaciones_dia
 @app.get("/dia")
