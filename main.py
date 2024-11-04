@@ -135,16 +135,27 @@ async def correlation_heatmap():
     return FileResponse(path, media_type="image/png")
 
 # Función para generar la nube de palabras
+
 def generate_wordcloud():
-    wordcloud = WordCloud(width=800, height=400, background_color="white").generate(" ".join(data['title']))
+    # Filtramos títulos no nulos y los unimos en un solo string
+    text = " ".join(data['title'].dropna().astype(str))
+    wordcloud = WordCloud(width=800, height=400, background_color="white").generate(text)
     path = "graphs/wordcloud.png"
+    
     plt.figure(figsize=(10, 5))
     plt.imshow(wordcloud, interpolation="bilinear")
     plt.axis("off")
     plt.title("Nube de palabras de títulos")
     plt.savefig(path)
     plt.close()
+    
     return path
+
+# Endpoint: wordcloud
+@app.get("/wordcloud/")
+async def wordcloud():
+    path = generate_wordcloud()
+    return FileResponse(path, media_type="image/png")
 
 # Endpoint: wordcloud
 @app.get("/wordcloud/")
