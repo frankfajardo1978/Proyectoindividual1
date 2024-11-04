@@ -5,7 +5,7 @@ import seaborn as sns
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.feature_extraction.text import TfidfVectorizer
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse
 import os
 
 # Cargar datos
@@ -46,14 +46,29 @@ def generate_histogram():
 tfidf_vectorizer = TfidfVectorizer(stop_words="english")
 tfidf_matrix = tfidf_vectorizer.fit_transform(data['overview'].fillna(""))
 
-# Seleccionar columnas numéricas para la matriz de correlación
-numeric_data = pd.read_csv("archivov4.csv")
-numeric_columns = ['Unnamed: 0', 'belongs_to_collection', 'budget', 'popularity', 
-                   'revenue', 'runtime', 'vote_average', 'vote_count', 
-                   'release_year', 'return']
-numeric_data = numeric_data[numeric_columns]
-
 app = FastAPI()
+
+@app.route('/correlation-heatmap', methods=['GET'])
+def correlation_heatmap():
+    try:
+        # Generar la matriz de correlación
+        correlation_matrix = df.corr()
+        
+        # Crear el gráfico del mapa de calor
+        plt.figure(figsize=(10, 8))
+        sns.heatmap(correlation_matrix, annot=True, cmap='coolwarm', square=True, fmt=".2f")
+        
+        # Guardar la imagen en un objeto de bytes
+        img = io.BytesIO()
+        plt.savefig(img, format='png')
+        img.seek(0)
+        plt.close()
+        
+        # Devolver la imagen
+        return send_file(img, mimetype='image/png')
+    except Exception as e:
+        return jsonify({"error": str(e)})
+
 
 # Endpoint para mostrar la nube de palabras
 @app.get("/wordcloud/")
@@ -86,12 +101,3 @@ async def recommendation(titulo: str):
     recommendations = data.iloc[similar_indices]['title'].tolist()
     
     return {"recommendations": recommendations}
-
-# Endpoint para la matriz de correlación
-@app.get("/correlation_matrix")
-async def get_correlation_matrix():
-    # Calcular la matriz de correlación
-    correlation_matrix = numeric_data.corr()
-    # Convertir la matriz a formato JSON
-    return JSONResponse(content=correlation_matrix.to_dict())
-
