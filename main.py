@@ -1,206 +1,100 @@
-from fastapi import FastAPI
 import pandas as pd
-from datetime import datetime
-
+import matplotlib.pyplot as plt
+from wordcloud import WordCloud
+import seaborn as sns
+from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.feature_extraction.text import TfidfVectorizer
+from fastapi import FastAPI, HTTPException
+from fastapi.responses import FileResponse
 import os
-import uvicorn
-from fastapi import FastAPI
 
+# Cargar datos
+data = pd.read_csv("/mnt/data/archivov4.csv")
+data = data[['title', 'overview']].dropna()  # Mantener solo las columnas de título y resumen, eliminando nulos
 
+# Convertir títulos a minúsculas para comparación insensible a mayúsculas
+data['title_lower'] = data['title'].str.lower()
 
+# Crear directorio para guardar gráficos
+os.makedirs("graphs", exist_ok=True)
 
+# Exploración de datos y generación de gráficos
+def generate_wordcloud():
+    wordcloud = WordCloud(width=800, height=400, background_color="white").generate(" ".join(data['title']))
+    plt.figure(figsize=(10, 5))
+    plt.imshow(wordcloud, interpolation="bilinear")
+    plt.axis("off")
+    plt.title("Nube de palabras de títulos")
+    path = "graphs/wordcloud.png"
+    plt.savefig(path)
+    plt.close()
+    return path
 
+def generate_histogram():
+    data['overview_length'] = data['overview'].apply(lambda x: len(str(x).split()))
+    plt.figure(figsize=(10, 5))
+    sns.histplot(data['overview_length'], bins=30, kde=True)
+    plt.title("Distribución de la longitud de los resúmenes")
+    plt.xlabel("Número de palabras")
+    plt.ylabel("Frecuencia")
+    path = "graphs/histogram.png"
+    plt.savefig(path)
+    plt.close()
+    return path
 
+# Nueva función para generar la matriz de correlación
+def generate_correlation_matrix():
+    numeric_data = data.select_dtypes(include=['float64', 'int64'])  # Seleccionar solo columnas numéricas
+    correlation_matrix = numeric_data.corr()
 
+    plt.figure(figsize=(10, 8))
+    sns.heatmap(correlation_matrix, annot=True, cmap="coolwarm", center=0)
+    plt.title("Matriz de Correlación")
+    path = "graphs/correlation_matrix.png"
+    plt.savefig(path)
+    plt.close()
+    return path
 
-# Cargar el archivo CSV al iniciar la aplicación
-data = pd.read_csv("archivov4.csv")
-
+# Optimización de recomendación con pre-cálculo de TF-IDF
+tfidf_vectorizer = TfidfVectorizer(stop_words="english")
+tfidf_matrix = tfidf_vectorizer.fit_transform(data['overview'].fillna(""))
 
 app = FastAPI()
 
-@app.get("/")
-def read_root():
-    return {"Bienvenido"}     
+# Endpoint para mostrar la nube de palabras
+@app.get("/wordcloud/")
+async def wordcloud():
+    path = generate_wordcloud()
+    return FileResponse(path, media_type="image/png")
 
-@app.get("/mes")
-def cantidad_filmaciones_mes(mes: str):
-    # Convertir el mes a minúsculas para evitar problemas de mayúsculas
-    mes = mes.lower()
-    
-    # Diccionario para convertir el nombre del mes en español al número correspondiente
-    meses = {
-        "enero": 1, "febrero": 2, "marzo": 3, "abril": 4,
-        "mayo": 5, "junio": 6, "julio": 7, "agosto": 8,
-        "septiembre": 9, "octubre": 10, "noviembre": 11, "diciembre": 12
-    }
-    
-    # Validar si el mes ingresado es válido
-    if mes not in meses:
-        return {"error": "Mes ingresado no válido. Por favor, ingrese un mes en español."}
-    
-    # Obtener el número del mes correspondiente
-    numero_mes = meses[mes]
-    
-    # Convertir la columna de fechas al tipo datetime si es necesario
-    data['release_date'] = pd.to_datetime(data['release_date'], errors='coerce')
-    
-    # Filtrar las películas estrenadas en el mes especificado
-    peliculas_mes = data[data['release_date'].dt.month == numero_mes]
-    cantidad = len(peliculas_mes)
-    
-    return {"mensaje": f"{cantidad} cantidad de películas fueron estrenadas en el mes de {mes.capitalize()}"}
+# Endpoint para mostrar el histograma
+@app.get("/histogram/")
+async def histogram():
+    path = generate_histogram()
+    return FileResponse(path, media_type="image/png")
 
+# Nuevo endpoint para mostrar la matriz de correlación
+@app.get("/correlation_matrix/")
+async def correlation_matrix():
+    path = generate_correlation_matrix()
+    return FileResponse(path, media_type="image/png")
 
+# Función de recomendación optimizada
+@app.get("/recommendation/")
+async def recommendation(titulo: str):
+    titulo = titulo.lower()
 
-
-# Definir el endpoint para cantidad_filmaciones_dia
-@app.get("/dia")
-def cantidad_filmaciones_dia(dia: str):
-    dia = dia.capitalize()  # Ajustar la capitalización para comparación
-    cantidad = data[data['dia_semana'] == dia].shape[0]  # Contar películas
-    return {"mensaje": f"{cantidad} películas fueron estrenadas en los días {dia}"}
-
-
-# Diccionario para traducir nombres de días de inglés a español
-dias_traduccion = {
-    "Monday": "Lunes",
-    "Tuesday": "Martes",
-    "Wednesday": "Miércoles",
-    "Thursday": "Jueves",
-    "Friday": "Viernes",
-    "Saturday": "Sábado",
-    "Sunday": "Domingo"
-}
-
-# Convertir la columna de fecha a formato de fecha y extraer el día de la semana en inglés
-data['release_date'] = pd.to_datetime(data['release_date'], errors='coerce')
-data['dia_semana'] = data['release_date'].dt.day_name()
-data['dia_semana'] = data['dia_semana'].map(dias_traduccion)  # Traducir a español
-
-
-
-
-
-
-@app.get("/titulo")
-def score_titulo(titulo: str):
-    # Buscar la película por título
-    film = data[data['title'].str.lower() == titulo.lower()]
-    
-    # Verificar si se encontró la película
-    if film.empty:
-        return {"error": "Película no encontrada"}
-    
-    # Extraer la información deseada
-    titulo = film.iloc[0]['title']
-    año = int(film.iloc[0]['release_year'])
-    score = film.iloc[0]['popularity']
-    
-    return {
-        "mensaje": f"La película {titulo} fue estrenada en el año {año} con un score/popularidad de {score}"
-    }
-
-
-@app.get("/")
-def read_root():
-    return {"message": "Bienvenido a la API de información de películas"}
-
-@app.get("/votos_titulo/{titulo_de_la_filmacion}")
-def votos_titulo(titulo_de_la_filmacion: str):
-    # Filtrar la película por título
-    pelicula = data[data['title'].str.lower() == titulo_de_la_filmacion.lower()]
-    
-    # Comprobar si existe la película
-    if pelicula.empty:
+    if titulo not in data['title_lower'].values:
         raise HTTPException(status_code=404, detail="Película no encontrada")
 
-    # Obtener el número de votos y el promedio de votos
-    votos = pelicula.iloc[0]['vote_count']
-    promedio_votos = pelicula.iloc[0]['vote_average']
-    titulo = pelicula.iloc[0]['title']
-    anio = int(pelicula.iloc[0]['release_year'])
-
-    # Validar si cumple con al menos 2000 votos
-    if votos < 2000:
-        return {"message": f"La película '{titulo}' no cumple con el requisito de 2000 valoraciones."}
+    # Obtener el índice de la película
+    idx = data.index[data['title_lower'] == titulo].tolist()[0]
     
-    # Retornar la información si cumple el requisito
-    return {
-        "message": f"La película '{titulo}' fue estrenada en el año {anio}.",
-        "votos_totales": votos,
-        "promedio_votos": promedio_votos
-    }
-
-
-@app.get("/actor/{nombre_actor}")
-def get_actor(nombre_actor: str):
-    try:
-        # Filtrar las películas en las que ha participado el actor
-        actor_data = data[data['cast_names'].str.contains(nombre_actor, case=False, na=False)]
-        
-        # Verificar si el actor tiene registros en el dataset
-        if actor_data.empty:
-            raise HTTPException(status_code=404, detail="Actor no encontrado")
-        
-        # Calcular la cantidad de películas, retorno total y promedio de retorno
-        cantidad_peliculas = actor_data.shape[0]
-        retorno_total = actor_data['return'].sum()
-        promedio_retorno = retorno_total / cantidad_peliculas if cantidad_peliculas > 0 else 0
-
-        # Responder con el mensaje formateado
-        return {
-            "mensaje": f"El actor {nombre_actor} ha participado de {cantidad_peliculas} filmaciones, "
-                       f"el mismo ha conseguido un retorno de {retorno_total} con un promedio de {promedio_retorno} por filmación"
-        }
+    # Calcular similitud de coseno
+    cosine_sim = cosine_similarity(tfidf_matrix[idx], tfidf_matrix).flatten()
     
-    except Exception as e:
-        # Manejo de errores para dar más detalles en el mensaje de error
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@app.get("/director/{nombre_director}")
-def get_director(nombre_director: str):
-    try:
-        # Filtrar las películas dirigidas por el director
-        director_data = data[data['director'].str.contains(nombre_director, case=False, na=False)]
-        
-        # Verificar si el director tiene registros en el dataset
-        if director_data.empty:
-            raise HTTPException(status_code=404, detail="Director no encontrado")
-        
-        # Calcular el retorno total del director
-        retorno_total = director_data['return'].sum()
-
-        # Crear una lista de películas con la información solicitada
-        peliculas_info = [
-            {
-                "nombre_pelicula": row['title'],
-                "fecha_lanzamiento": row['release_year'],
-                "retorno_individual": row['return'],
-                "costo": row['budget'],
-                "ganancia": row['budget'] * row['return']
-            }
-            for _, row in director_data.iterrows()
-        ]
-        
-        # Devolver los resultados
-        return {
-            "nombre_director": nombre_director,
-            "retorno_total": retorno_total,
-            "peliculas": peliculas_info
-        }
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-        
-        # Responder con el retorno total y la información de cada película
-        return {
-            "mensaje": f"El director {nombre_director} ha conseguido un retorno total de {retorno_total}.",
-            "peliculas": peliculas_info
-        }
+    # Obtener las películas más similares (excluyendo la misma)
+    similar_indices = cosine_sim.argsort()[-6:-1][::-1]
+    recommendations = data.iloc[similar_indices]['title'].tolist()
     
-    except Exception as e:
-        # Manejo de errores para dar más detalles en el mensaje de error
-        raise HTTPException(status_code=500, detail=str(e))
-
+    return {"recommendations": recommendations}
