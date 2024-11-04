@@ -86,18 +86,24 @@ def cantidad_filmaciones_dia(dia: str):
 # Ensure all titles are lowercase for matching purposes
 data['title_lower'] = data['title'].str.lower()
 
+# Asegúrate de que todas las cadenas en 'title' estén en minúsculas
+data['title_lower'] = data['title'].str.lower()
+
 @app.get("/titulo")
 def score_titulo(titulo: str):
-    # Search by lowercase title
+    # Filtra las películas con el título buscado en minúsculas
     film = data[data['title_lower'] == titulo.lower()]
-    if film.empty:
-        return {"error": "Película no encontrada"}
+    
+    # Verifica si la película existe y si tiene datos completos
+    if film.empty or pd.isnull(film.iloc[0]['release_year']) or pd.isnull(film.iloc[0]['popularity']):
+        return {"error": "Película no encontrada o datos incompletos"}
     
     titulo = film.iloc[0]['title']
     año = int(film.iloc[0]['release_year'])
     score = film.iloc[0]['popularity']
     
     return {"mensaje": f"La película {titulo} fue estrenada en el año {año} con un score/popularidad de {score}"}
+
 
 
 @app.get("/votos_titulo/{titulo_de_la_filmacion}")
