@@ -19,9 +19,18 @@ data['title_lower'] = data['title'].str.lower()
 os.makedirs("graphs", exist_ok=True)
 
 # Generación del mapa de calor de la matriz de correlaciones
+
+
+# Cargar los datos
+file_path = '/mnt/data/archivov4.csv'
+df_2 = pd.read_csv(file_path)
+
+# Seleccionar solo las columnas numéricas
+numeric_data = df_2.select_dtypes(include=['float64', 'int64'])
+
 def generate_correlation_heatmap():
     # Calcular matriz de correlaciones
-    correlation_matrix = data[['title', 'overview']].apply(lambda x: pd.factorize(x)[0]).corr()
+    correlation_matrix = df_2.apply(lambda x: pd.factorize(x)[0]).corr()
 
     # Crear el mapa de calor
     plt.figure(figsize=(8, 6))
