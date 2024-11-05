@@ -3,9 +3,9 @@ from fastapi.responses import FileResponse
 import pandas as pd
 from datetime import datetime
 import os
-import matplotlib.pyplot as plt
-from wordcloud import WordCloud
-import seaborn as sns
+# import matplotlib.pyplot as plt
+# from wordcloud import WordCloud
+# import seaborn as sns
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.feature_extraction.text import TfidfVectorizer
 
@@ -16,7 +16,7 @@ data = pd.read_csv("archivov4.csv", index_col=0)
 data['title_lower'] = data['title'].str.lower()
 
 # Crear directorio para guardar gráficos
-os.makedirs("graphs", exist_ok=True)
+# os.makedirs("graphs", exist_ok=True)
 
 # Crear aplicación FastAPI
 app = FastAPI()
@@ -122,69 +122,69 @@ def get_director(nombre_director: str):
     }
 
 # Función para el mapa de calor de correlación
-def generate_correlation_heatmap():
-    numerical_data = data.select_dtypes(include=['float64', 'int64'])
-    correlation_matrix = numerical_data.corr()
-    plt.figure(figsize=(10, 8))
-    sns.heatmap(correlation_matrix, annot=True, cmap="coolwarm", fmt=".2f")
-    path = "graphs/correlation_heatmap.png"
-    plt.savefig(path)
-    plt.close()
-    return path
+# def generate_correlation_heatmap():
+    # numerical_data = data.select_dtypes(include=['float64', 'int64'])
+    # correlation_matrix = numerical_data.corr()
+    # plt.figure(figsize=(10, 8))
+    # sns.heatmap(correlation_matrix, annot=True, cmap="coolwarm", fmt=".2f")
+    # path = "graphs/correlation_heatmap.png"
+    # plt.savefig(path)
+    # plt.close()
+    # return path
 
 # Endpoint: correlation_heatmap
-@app.get("/correlation-heatmap/")
-async def correlation_heatmap():
-    path = generate_correlation_heatmap()
-    return FileResponse(path, media_type="image/png")
+# @app.get("/correlation-heatmap/")
+# async def correlation_heatmap():
+    # path = generate_correlation_heatmap()
+    # return FileResponse(path, media_type="image/png")
 
 # Función para generar la nube de palabras
 
-def generate_wordcloud():
+# def generate_wordcloud():
     # Filtramos títulos no nulos y los unimos en un solo string
-    text = " ".join(data['title'].dropna().astype(str))
-    wordcloud = WordCloud(width=800, height=400, background_color="white").generate(text)
-    path = "graphs/wordcloud.png"
+    # text = " ".join(data['title'].dropna().astype(str))
+    # wordcloud = WordCloud(width=800, height=400, background_color="white").generate(text)
+    # path = "graphs/wordcloud.png"
     
-    plt.figure(figsize=(10, 5))
-    plt.imshow(wordcloud, interpolation="bilinear")
-    plt.axis("off")
-    plt.title("Nube de palabras de títulos")
-    plt.savefig(path)
-    plt.close()
+    # plt.figure(figsize=(10, 5))
+    # plt.imshow(wordcloud, interpolation="bilinear")
+    # plt.axis("off")
+    # plt.title("Nube de palabras de títulos")
+    # plt.savefig(path)
+    # plt.close()
     
     return path
 
 # Endpoint: wordcloud
-@app.get("/wordcloud/")
-async def wordcloud():
-    path = generate_wordcloud()
-    return FileResponse(path, media_type="image/png")
+# @app.get("/wordcloud/")
+# async def wordcloud():
+    # path = generate_wordcloud()
+    ##return FileResponse(path, media_type="image/png")
 
 # Endpoint: wordcloud
-@app.get("/wordcloud/")
-async def wordcloud():
-    path = generate_wordcloud()
-    return FileResponse(path, media_type="image/png")
+# @app.get("/wordcloud/")
+# async def wordcloud():
+    # path = generate_wordcloud()
+    # return FileResponse(path, media_type="image/png")
 
 # Función para generar el histograma
-def generate_histogram():
-    data['overview_length'] = data['overview'].apply(lambda x: len(str(x).split()))
-    plt.figure(figsize=(10, 5))
-    sns.histplot(data['overview_length'], bins=30, kde=True)
-    plt.title("Distribución de la longitud de los resúmenes")
-    plt.xlabel("Número de palabras")
-    plt.ylabel("Frecuencia")
-    path = "graphs/histogram.png"
-    plt.savefig(path)
-    plt.close()
-    return path
+# def generate_histogram():
+    # data['overview_length'] = data['overview'].apply(lambda x: len(str(x).split()))
+    # plt.figure(figsize=(10, 5))
+    # sns.histplot(data['overview_length'], bins=30, kde=True)
+    # plt.title("Distribución de la longitud de los resúmenes")
+    # plt.xlabel("Número de palabras")
+    # plt.ylabel("Frecuencia")
+    # path = "graphs/histogram.png"
+    # plt.savefig(path)
+    # plt.close()
+    # return path
 
 # Endpoint: histogram
-@app.get("/histogram/")
-async def histogram():
-    path = generate_histogram()
-    return FileResponse(path, media_type="image/png")
+# @app.get("/histogram/")
+# async def histogram():
+    # path = generate_histogram()
+    # return FileResponse(path, media_type="image/png")
 
 # Sistema de recomendación basado en similitud de coseno
 tfidf_vectorizer = TfidfVectorizer(stop_words="english")
