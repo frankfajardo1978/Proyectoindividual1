@@ -25,7 +25,7 @@ En el proceso de ETL https://github.com/frankfajardo1978/Proyectoindividual1/blo
 Por ultimo se unifican los dataset de credits y movies_dataset para tener el dataset definitivo con el cual se trabajara en la API.
 
 
-##2-  DESCRIPCION DE LAS APIS.
+##2-DESCRIPCION DE LAS APIS.
 
 Basado en el archivo creado y depurado de Movies_dataset y Credits se genero el  sistemas de consultas y recomendaciones contenidos en nuestra API contenida en main.py https://github.com/frankfajardo1978/Proyectoindividual1/blob/main/main.py,  a continuacion una breve descripcion de cada una.
 
@@ -51,17 +51,17 @@ Esta funcion permite consultar el nombre de un director, retornando el mismo,  r
 ### Sistema de recomendación basado en similitud de coseno.
 Esta es una funcion que permite realizar una consulta de un nombre de pelicula y el sistema devolvera 5 recomendaciones de titulos similares basados en la columna "overview" del dataset.
 
-###3- EDA
-Esn este punto en particular no nos enfocaos en detectar valores nulos, duplicados, faltantes y validacion de tipos de datos se realizaon en el ETL, por tranto aqui nos enfocamos en relizar lo siguiente:
+###3-EDA
+El notebook del EDA se locliza en https://github.com/frankfajardo1978/Proyectoindividual1/blob/main/EDA.ipynb.
+En este punto en particular no nos enfocaos en detectar valores nulos, duplicados, faltantes y validacion de tipos de datos se realizaon en el ETL, por tanto aqui nos enfocamos en relizar lo siguiente:
 
 - Mapa de correlacion basado en Pearson con cuadro de calor
 - Mapa de distribucion.
+- Visualizacion de Outliers
+- Nuebs de Palabras
 - 
 
 
-
-
-### Deployment
+### 4-Deployment
 
 En este punto se podran vaiidar las funciones API en funcionamiento en el link https://proyectoindividual1-tvr2.onrender.com.
-
